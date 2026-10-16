@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Дашборды — Система оптимизации инвестиционного портфеля</title>
+  <style>
+    :root { 
+      --paper:#fffef8; 
+      --background:#f3efe8; 
+      --green:#344a32; 
+      --ink:#20211b; 
+      --muted:#77776d; 
+      --line:#cbcbbb; 
+      --accent:#80674e; 
+      --chart-grid: #e2ded2;
+    }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--background); color:var(--ink); font-family:"Segoe UI",Arial,sans-serif; font-size:12px; }
+    button,a { -webkit-tap-highlight-color:transparent; }
+    button { font:inherit; cursor:pointer; }
+    button:focus-visible,a:focus-visible { outline:3px solid #b79864; outline-offset:4px; }
+    .wide { max-width:1056px; margin:auto; }
+    
+    /* Header */
+    header { background:var(--paper); padding:34px 24px 23px; }
+    .eyebrow,.label { font-family:"Courier New",monospace; font-size:9px; letter-spacing:1.7px; text-transform:uppercase; }
+    .eyebrow { margin:0 0 8px; color:var(--accent); }
+    h1,h2,h3 { font-family:Georgia,"Times New Roman",serif; }
+    h1 { margin:0; font-size:46px; line-height:1.16; letter-spacing:-.7px; }
+    .subtitle { margin:5px 0 0; color:var(--muted); }
+    
+    /* Navigation */
+    nav { background:var(--green); color:#fffef0; }
+    .nav-inner { min-height:38px; display:flex; align-items:center; gap:32px; padding:4px 0; }
+    nav a { color:#c0caba; text-decoration:none; font-size:10px; letter-spacing:.4px; }
+    nav a[aria-current] { color:#fffef0; font-weight:700; }
+    .theme { 
+      width:84px; 
+      display:inline-flex; 
+      align-items:center; 
+      justify-content:center; 
+      color:#e0e6d8; 
+      background:#ffffff10; 
+      border:1px solid #ffffff16; 
+      border-radius:20px; 
+      padding:7px 0; 
+      font-family:monospace; 
+      font-size:9px; 
+    }
+    
+    /* Main Content */
+    main { max-width:988px; margin:auto; padding:35px 0 50px; }
+    .section-label { margin:0 0 14px; color:var(--muted); letter-spacing:1.5px; }
+
+    /* Summary KPI Bar */
+    .kpi-row { display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; margin-bottom:20px; }
+    .kpi-card { background:var(--paper); border:1px solid var(--line); padding:16px; position:relative; }
+    .kpi-card .number { font:9px "Courier New",monospace; color:#a8aa9e; margin-bottom:6px; display:block; }
+    .kpi-card .kpi-val { font:bold 22px Georgia,serif; color:var(--ink); margin:4px 0 2px; }
+    .kpi-card .kpi-title { font-size:9px; color:var(--accent); text-transform:uppercase; font-family:"Courier New",monospace; letter-spacing:0.8px; }
+
+    /* Dashboard Panels Grid */
+    .charts-grid { display:grid; grid-template-columns:repeat(2, 1fr); gap:12px; }
+    .chart-panel { 
+      background:var(--paper); 
+      border:1px solid var(--line); 
+      padding:24px 20px 20px; 
+      position:relative; 
+      display:flex; 
+      flex-direction:column; 
+    }
+    .chart-panel::after { 
+      content:""; 
+      width:24px; 
+      height:1px; 
+      background:var(--line); 
+      position:absolute; 
+      left:20px; 
+      top:16px; 
+    }
+    .panel-meta { display:flex; justify-content:space-between; align-items:baseline; margin-top:8px; margin-bottom:8px; }
+    .panel-meta .number { font:9px "Courier New",monospace; letter-spacing:1px; color:#a8aa9e; }
+    .panel-meta .category { font-size:8px; letter-spacing:1px; color:var(--accent); text-transform:uppercase; }
+    
+    .chart-panel h2 { font-size:18px; margin:0 0 6px; line-height:1.2; }
+    .chart-caption { font-size:11px; line-height:1.6; color:var(--muted); margin:0 0 18px; }
+    
+    /* SVG Chart Placeholder Area */
+    .chart-box { 
+      width:100%; 
+      height:210px; 
+      border:1px dashed var(--line); 
+      background:rgba(0,0,0,0.01); 
+      display:flex; 
+      align-items:center; 
+      justify-content:center; 
+      position:relative; 
+    }
+    .chart-box svg { width:100%; height:100%; overflow:visible; }
+
+    /* Footer */
+    footer { background:#1d1c16; color:#777362; padding:34px 32px 27px; }
+    .footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr; gap:55px; padding-bottom:27px; }
+    footer h3 { color:#ece9de; font-size:15px; margin:0 0 9px; }
+    footer p { font-size:10px; line-height:1.9; margin:0; }
+    footer .label { color:#595648; font-size:8px; margin:1px 0 10px; }
+    footer a { color:inherit; text-decoration:none; }
+    .copyright { border-top:1px solid #ffffff05; padding-top:18px; display:flex; justify-content:space-between; gap:16px; color:#514b3d; font:8px monospace; letter-spacing:1px; }
+
+    /* Dark Mode Theme */
+    body.dark { 
+      --paper:#242a22; 
+      --background:#1c211b; 
+      --ink:#eeeee2; 
+      --muted:#abb09f; 
+      --line:#4d5945; 
+      --accent:#c2ae8c; 
+      --chart-grid:#2f3a2c;
+    }
+    
+    @media(max-width:1120px) { .nav-inner { margin:0 24px; } main { margin:0 32px; } }
+    @media(max-width:860px) { .charts-grid { grid-template-columns:1fr; } .kpi-row { grid-template-columns:repeat(2, 1fr); } }
+    @media(max-width:760px) { 
+      h1 { font-size:34px; } 
+      .nav-inner { gap:24px; flex-wrap:wrap; padding:10px 0; } 
+      main { margin:0 20px; padding-top:28px; } 
+      .kpi-row { grid-template-columns:1fr; }
+      .footer-grid { grid-template-columns:1fr 1fr; gap:25px; } 
+      .footer-grid>div:first-child { grid-column:1/-1; } 
+      .copyright { flex-direction:column; line-height:1.7; } 
+    }
+    @media(prefers-reduced-motion:no-preference) { .chart-panel,.kpi-card,.theme { transition:background .2s,color .2s; } }
+  </style>
+</head>
+<body>
+  <header id="overview">
+    <div class="wide">
+      <p class="eyebrow">МИЭМ НИУ ВШЭ — Учебный год 2025/26</p>
+      <h1>Дашборды оптимизации портфеля</h1>
+      <p class="subtitle">Инженерно-исследовательский проект · МИЭМ · 2026</p>
+    </div>
+  </header>
+
+  <nav aria-label="Основная навигация">
+    <div class="wide nav-inner">
+      <button class="theme" type="button" aria-pressed="false">☾ Тёмная</button>
+      <a href="/">Главная</a>
+      <a href="/dashboard" aria-current="page">Дашборды</a>
+      <a href="/#resources">Ресурсы</a>
+      <a href="/contact">Контакты</a>
+    </div>
+  </nav>
+
+  <main>
+    <p class="label section-label">Ключевые показатели — Расчетный портфель MOEX</p>
+    
+    <!-- KPI Row -->
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <span class="number">01</span>
+        <div class="kpi-title">Ожидаемая доходность</div>
+        <div class="kpi-val">+21.8%</div>
+      </div>
+      <div class="kpi-card">
+        <span class="number">02</span>
+        <div class="kpi-title">Волатильность (σ)</div>
+        <div class="kpi-val">12.4%</div>
+      </div>
+      <div class="kpi-card">
+        <span class="number">03</span>
+        <div class="kpi-title">Коэффициент Шарпа</div>
+        <div class="kpi-val">1.76</div>
+      </div>
+      <div class="kpi-card">
+        <span class="number">04</span>
+        <div class="kpi-title">Historical VaR (95%)</div>
+        <div class="kpi-val">-2.15%</div>
+      </div>
+    </div>
+
+    <p class="label section-label" style="margin-top:24px;">Визуализация математических моделей</p>
+    
+    <!-- Charts Grid -->
+    <div class="charts-grid">
+      
+      <!-- Graph 1: Efficient Frontier -->
+      <article class="chart-panel">
+        <div class="panel-meta">
+          <span class="number">FIG. 01</span>
+          <span class="category">Марковиц MVO</span>
+        </div>
+        <h2>Граница эффективности</h2>
+        <p class="chart-caption">Соотношение ожидаемого риска и доходности по алгоритму квадратичного программирования.</p>
+        <div class="chart-box">
+          <svg viewBox="0 0 400 200" preserveAspectRatio="none">
+            <!-- Сетка -->
+            <line x1="40" y1="20" x2="380" y2="20" stroke="var(--chart-grid)" stroke-dasharray="3"/>
+            <line x1="40" y1="65" x2="380" y2="65" stroke="var(--chart-grid)" stroke-dasharray="3"/>
+            <line x1="40" y1="110" x2="380" y2="110" stroke="var(--chart-grid)" stroke-dasharray="3"/>
+            <line x1="40" y1="155" x2="380" y2="155" stroke="var(--chart-grid)" stroke-dasharray="3"/>
+            <line x1="40" y1="175" x2="380" y2="175" stroke="var(--line)"/>
+            <line x1="40" y1="20" x2="40" y2="175" stroke="var(--line)"/>
+            <!-- Облако случайных портфелей -->
+            <circle cx="90" cy="150" r="2.5" fill="var(--muted)" opacity="0.3"/>
+            <circle cx="120" cy="130" r="2.5" fill="var(--muted)" opacity="0.4"/>
+            <circle cx="150" cy="115" r="2.5" fill="var(--muted)" opacity="0.3"/>
+            <circle cx="170" cy="140" r="2.5" fill="var(--muted)" opacity="0.35"/>
+            <circle cx="210" cy="95" r="2.5" fill="var(--muted)" opacity="0.3"/>
+            <circle cx="250" cy="80" r="2.5" fill="var(--muted)" opacity="0.4"/>
+            <circle cx="300" cy="70" r="2.5" fill="var(--muted)" opacity="0.3"/>
+            <circle cx="330" cy="65" r="2.5" fill="var(--muted)" opacity="0.35"/>
+            <!-- Кривая границы -->
+            <path d="M 60 160 Q 90 70 200 45 T 370 30" fill="none" stroke="var(--accent)" stroke-width="2"/>
+            <!-- Точка оптимума Шарпа -->
+            <circle cx="190" cy="48" r="5" fill="var(--green)" stroke="var(--paper)" stroke-width="2"/>
+            <text x="202" y="45" font-size="9" fill="var(--ink)" font-family="monospace">Max Sharpe</text>
+          </svg>
+        </div>
+      </article>
+
+      <!-- Graph 2: Cumulative Returns -->
+      <article class="chart-panel">
+        <div class="panel-meta">
+          <span class="number">FIG. 02</span>
+          <span class="category">Бэктест</span>
+        </div>
+        <h2>Кумулятивная доходность</h2>
+        <p class="chart-caption">Сравнение синтетического портфеля с базовым индексом Мосбиржи (IMOEX).</p>
+        <div class="chart-box">
+          <svg viewBox="0 0 400 200" preserveAspectRatio="none">
+            <!-- Сетка -->
+            <line x1="40" y1="20" x2="380" y2="20" stroke="var(--chart-grid)" stroke-dasharray="3"/>
+            <line x1="40" y1="70" x2="380" y2="70" stroke="var(--chart-grid)" stroke-dasharray="3"/>
+            <line x1="40" y1="120" x2="380" y2="120" stroke="var(--chart-grid)" stroke-dasharray="3"/>
+            <line x1="40" y1="170" x2="380" y2="170" stroke="var(--line)"/>
+            <line x1="40" y1="20" x2="40" y2="170" stroke="var(--line)"/>
+            <!-- Линия бенчмарка (MOEX) -->
+            <path d="M 40 160 L 90 150 L 140 155 L 190 140 L 240 145 L 290 130 L 340 135 L 380 125" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4"/>
+            <!-- Линия модели -->
+            <path d="M 40 160 L 90 140 L 140 130 L 190 105 L 240 95 L 290 65 L 340 55 L 380 35" fill="none" stroke="var(--green)" stroke-width="2"/>
+            <text x="310" y="30" font-size="9" fill="var(--green)" font-family="monospace">Портфель</text>
+            <text x="310" y="115" font-size="9" fill="var(--muted)" font-family="monospace">Индекс MOEX</text>
+          </svg>
+        </div>
+      </article>
+
+      <!-- Graph 3: Asset Allocation -->
+      <article class="chart-panel">
+        <div class="panel-meta">
+          <span class="number">FIG. 03</span>
+          <span class="category">Веса активов</span>
+        </div>
+        <h2>Структура распределения (Веса)</h2>
+        <p class="chart-caption">Текущее распределение долей ценных бумаг в сбалансированном портфеле.</p>
+        <div class="chart-box">
+          <svg viewBox="0 0 400 200">
+            <!-- Горизонтальные бары -->
+            <text x="40" y="42" font-size="9" fill="var(--ink)" font-family="monospace">SBER (30%)</text>
+            <rect x="130" y="32" width="180" height="13" fill="var(--green)"/>
+
+            <text x="40" y="77" font-size="9" fill="var(--ink)" font-family="monospace">LKOH (25%)</text>
+            <rect x="130" y="67" width="150" height="13" fill="var(--accent)"/>
+
+            <text x="40" y="112" font-size="9" fill="var(--ink)" font-family="monospace">GMKN (20%)</text>
+            <rect x="130" y="102" width="120" height="13" fill="#6e7d63"/>
+
+            <text x="40" y="147" font-size="9" fill="var(--ink)" font-family="monospace">YNDX (15%)</text>
+            <rect x="130" y="137" width="90" height="13" fill="#a89a84"/>
+
+            <text x="40" y="182" font-size="9" fill="var(--ink)" font-family="monospace">OFZ  (10%)</text>
+            <rect x="130" y="172" width="60" height="13" fill="var(--line)"/>
+          </svg>
+        </div>
+      </article>
+
+      <!-- Graph 4: Correlation Matrix Heatmap -->
+      <article class="chart-panel">
+        <div class="panel-meta">
+          <span class="number">FIG. 04</span>
+          <span class="category">Корреляция</span>
+        </div>
+        <h2>Матрица взаимосвязи активов</h2>
+        <p class="chart-caption">Тепловая карта парных коэффициентов корреляции лог-доходностей тикеров.</p>
+        <div class="chart-box">
+          <svg viewBox="0 0 400 200">
+            <!-- Подписи колонок -->
+            <text x="135" y="30" font-size="8" fill="var(--muted)" font-family="monospace" text-anchor="middle">SBER</text>
+            <text x="175" y="30" font-size="8" fill="var(--muted)" font-family="monospace" text-anchor="middle">LKOH</text>
+            <text x="215" y="30" font-size="8" fill="var(--muted)" font-family="monospace" text-anchor="middle">GMKN</text>
+            <text x="255" y="30" font-size="8" fill="var(--muted)" font-family="monospace" text-anchor="middle">YNDX</text>
+
+            <!-- Строка 1 -->
+            <text x="105" y="58" font-size="8" fill="var(--muted)" font-family="monospace" text-anchor="end">SBER</text>
+            <rect x="120" y="42" width="30" height="24" fill="var(--green)"/>
+            <rect x="160" y="42" width="30" height="24" fill="var(--green)" opacity="0.75"/>
+            <rect x="200" y="42" width="30" height="24" fill="var(--green)" opacity="0.45"/>
+            <rect x="240" y="42" width="30" height="24" fill="var(--green)" opacity="0.25"/>
+
+            <!-- Строка 2 -->
+            <text x="105" y="93" font-size="8" fill="var(--muted)" font-family="monospace" text-anchor="end">LKOH</text>
+            <rect x="120" y="77" width="30" height="24" fill="var(--green)" opacity="0.75"/>
+            <rect x="160" y="77" width="30" height="24" fill="var(--green)"/>
+            <rect x="200" y="77" width="30" height="24" fill="var(--green)" opacity="0.55"/>
+            <rect x="240" y="77" width="30" height="24" fill="var(--green)" opacity="0.2"/>
+
+            <!-- Строка 3 -->
+            <text x="105" y="128" font-size="8" fill="var(--muted)" font-family="monospace" text-anchor="end">GMKN</text>
+            <rect x="120" y="112" width="30" height="24" fill="var(--green)" opacity="0.45"/>
+            <rect x="160" y="112" width="30" height="24" fill="var(--green)" opacity="0.55"/>
+            <rect x="200" y="112" width="30" height="24" fill="var(--green)"/>
+            <rect x="240" y="112" width="30" height="24" fill="var(--green)" opacity="0.35"/>
+
+            <!-- Строка 4 -->
+            <text x="105" y="163" font-size="8" fill="var(--muted)" font-family="monospace" text-anchor="end">YNDX</text>
+            <rect x="120" y="147" width="30" height="24" fill="var(--green)" opacity="0.25"/>
+            <rect x="160" y="147" width="30" height="24" fill="var(--green)" opacity="0.2"/>
+            <rect x="200" y="147" width="30" height="24" fill="var(--green)" opacity="0.35"/>
+            <rect x="240" y="147" width="30" height="24" fill="var(--green)"/>
+          </svg>
+        </div>
+      </article>
+
+    </div>
+  </main>
+
+  <footer>
+    <div class="wide footer-grid">
+      <div>
+        <h3>Система оптимизации инвестиционного портфеля с использованием методов количественных финансов</h3>
+        <p>Платформа, созданная для экспериментов и аналитики рынка Московской биржи с помощью математических моделей. Проект МИЭМ 2026.</p>
+      </div>
+      <div id="contact">
+        <p class="label">Контакт</p>
+        <p>Волгин Борис<br><a href="mailto:bmvolgin@edu.hse.ru">bmvolgin@edu.hse.ru</a><br>МИЭМ, Высшая школа экономики</p>
+      </div>
+    </div>
+    <div class="copyright">
+      <span>© 2026 Высшая школа экономики. Все права защищены.</span>
+      <span>FinProj 101 — v1.0</span>
+      <span>Не является финансовой рекомендацией.</span>
+    </div>
+  </footer>
+
+  <script>
+    // Переключатель тёмной темы с сохранением состояния
+    const themeBtn = document.querySelector('.theme');
+    
+    if (localStorage.getItem('theme') === 'dark') {
+      document.body.classList.add('dark');
+      themeBtn.setAttribute('aria-pressed', 'true');
+      themeBtn.textContent = '☀ Светлая';
+    }
+
+    themeBtn.addEventListener('click', event => {
+      const dark = document.body.classList.toggle('dark');
+      event.currentTarget.setAttribute('aria-pressed', String(dark));
+      event.currentTarget.textContent = dark ? '☀ Светлая' : '☾ Тёмная';
+      localStorage.setItem('theme', dark ? 'dark' : 'light');
+    });
+  </script>
+</body>
+</html>

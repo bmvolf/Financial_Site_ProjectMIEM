@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Система оптимизации инвестиционного портфеля с использованием методов количественных финансов</title>
+  
+  <script>
+    if (localStorage.getItem('theme') === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+  </script>
+
+  <style>
+    :root { 
+      --paper:#fffef8; 
+      --background:#f3efe8; 
+      --green:#344a32; 
+      --ink:#20211b; 
+      --muted:#77776d; 
+      --line:#cbcbbb; 
+      --accent:#80674e; 
+      --disabled-btn:#b5b8ad;
+      --disabled-bg:#e6e3da;
+    }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--background); color:var(--ink); font-family:"Segoe UI",Arial,sans-serif; font-size:12px; }
+    button,a { -webkit-tap-highlight-color:transparent; }
+    button { font:inherit; cursor:pointer; }
+    button:focus-visible,a:focus-visible { outline:3px solid #b79864; outline-offset:4px; }
+    .wide { max-width:1056px; margin:auto; }
+    header { background:var(--paper); padding:34px 24px 23px; }
+    .eyebrow,.label { font-family:"Courier New",monospace; font-size:9px; letter-spacing:1.7px; text-transform:uppercase; }
+    .eyebrow { margin:0 0 8px; color:var(--accent); }
+    h1,h2,h3 { font-family:Georgia,"Times New Roman",serif; }
+    h1 { margin:0; font-size:46px; line-height:1.16; letter-spacing:-.7px; }
+    .subtitle { margin:5px 0 0; color:var(--muted); }
+    nav { background:var(--green); color:#fffef0; }
+    .nav-inner { min-height:38px; display:flex; align-items:center; gap:32px; padding:4px 0; }
+    nav a { color:#c0caba; text-decoration:none; font-size:10px; letter-spacing:.4px; }
+    nav a[aria-current] { color:#fffef0; font-weight:700; }
+
+    .theme { 
+      width:84px; 
+      display:inline-flex; 
+      align-items:center; 
+      justify-content:center; 
+      color:#e0e6d8; 
+      background:#ffffff10; 
+      border:1px solid #ffffff16; 
+      border-radius:20px; 
+      padding:7px 0; 
+      font-family:monospace; 
+      font-size:9px; 
+    }
+
+    main { max-width:988px; margin:auto; padding:35px 0 33px; }
+    .section-label { margin:0 0 14px; color:var(--muted); letter-spacing:1.5px; }
+    .modules { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; }
+    .module { position:relative; min-height:149px; border:1px solid var(--line); border-radius:0; background:var(--paper); color:var(--ink); text-align:left; padding:20px 16px; display:flex; flex-direction:column; align-items:flex-start; }
+    .module::after { content:""; width:20px; height:1px; background:var(--line); position:absolute; left:16px; bottom:19px; }
+    .number { font:9px "Courier New",monospace; letter-spacing:1px; color:#a8aa9e; margin-bottom:13px; }
+    .category { font-size:8px; letter-spacing:1px; color:var(--accent); text-transform:uppercase; }
+    .module strong { font: bold 15px Georgia,serif; margin-top:7px; }
+
+    .module-status { 
+      margin-top:auto; 
+      font-family:monospace; 
+      font-size:8px; 
+      letter-spacing:0.5px; 
+      color:#9aa88e; 
+      padding-top:8px; 
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      max-width:100%;
+    }
+    .module[aria-pressed="true"] .module-status { color:#e6e8db; }
+    .module[aria-pressed="true"] { background:var(--green); color:#fffef0; border-color:var(--green); box-shadow:0 5px 12px #24331e20; }
+    .module[aria-pressed="true"] .category { color:#d0d8c6; }
+    .module[aria-pressed="true"]::after { background:#6e7d63; }
+    
+    .confirm-row { text-align:center; padding:16px 0 20px; }
+    
+    .confirm { 
+      min-width:230px; 
+      min-height:40px; 
+      border:0; 
+      border-radius:1px; 
+      padding:12px 24px; 
+      color:#fffef0; 
+      background:var(--green); 
+      font-size:11px; 
+      letter-spacing:.4px; 
+      font-weight:600; 
+      transition:background 0.2s, opacity 0.2s, cursor 0.2s;
+    }
+    .confirm:disabled { 
+      background:var(--disabled-btn); 
+      color:var(--disabled-bg); 
+      cursor:not-allowed; 
+      opacity:0.65;
+    }
+
+    /* Карточка с деталями */
+    .detail { display:grid; grid-template-columns:300px 1fr; min-height:330px; border:1px solid var(--line); background:var(--paper); }
+    aside { background:var(--green); color:#e6e8db; padding:34px 24px 27px; }
+    aside .label { color:#9aa88e; font-size:8px; letter-spacing:1.4px; margin:0 0 16px; }
+
+    /* Список методов с точками слева */
+    .method-list { padding:0; margin:0; list-style:none; }
+    .method-item {
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:10px 8px;
+      border-bottom:1px solid #ffffff12;
+      cursor:pointer;
+      border-radius:2px;
+      transition:background 0.15s;
+    }
+    .method-item:last-child { border-bottom:0; }
+    .method-item:hover { background:#ffffff0d; }
+    .method-item.active { background:#ffffff18; }
+    
+    .method-num { color:#8b9a80; font:8px monospace; }
+
+    /* Сама кликабельная точка */
+    .method-dot {
+      width:14px;
+      height:14px;
+      border-radius:50%;
+      border:1.5px solid #8b9a80;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      flex-shrink:0;
+      transition:border-color 0.2s;
+    }
+    .method-item:hover .method-dot { border-color:#e6e8db; }
+    .method-dot::after {
+      content:"";
+      width:6px;
+      height:6px;
+      border-radius:50%;
+      background:transparent;
+      transition:background 0.15s;
+    }
+    .method-item.active .method-dot {
+      border-color:#fffef0;
+    }
+    .method-item.active .method-dot::after {
+      background:#fffef0;
+    }
+
+    .method-name { font-size:10px; line-height:1.4; color:#d6ded0; flex:1; user-select:none; }
+    .method-item.active .method-name { color:#fffef0; font-weight:600; }
+
+    /* Правая (центральная) колонка с описанием */
+    article { padding:34px 39px 36px; }
+    .meta { display:flex; align-items:center; gap:13px; font:8px monospace; letter-spacing:1px; color:var(--muted); text-transform:uppercase; }
+    .meta::after { content:""; height:1px; background:var(--line); flex:1; order:1; }
+    .meta span:last-child { order:2; color:var(--accent); letter-spacing:.7px; }
+    h2 { font-size:29px; margin:23px 0 15px; line-height:1.2; }
+    .description { max-width:500px; font-size:12px; line-height:1.95; margin:0 0 20px; color:var(--ink); }
+
+    /* Блок детального описания выбранного метода */
+    .method-detail-box {
+      margin-top:20px;
+      padding-top:18px;
+      border-top:1px solid var(--line);
+      max-width:500px;
+    }
+    .method-detail-title {
+      font-family:Georgia,serif;
+      font-size:16px;
+      font-weight:bold;
+      margin:5px 0 8px;
+      color:var(--ink);
+    }
+    .method-detail-desc {
+      font-size:12px;
+      line-height:1.85;
+      font-style:italic;
+      color:var(--muted);
+      margin:0;
+    }
+
+    footer { background:#1d1c16; color:#777362; padding:34px 32px 27px; }
+    .footer-grid { display:grid; grid-template-columns:2fr 1fr 1fr; gap:55px; padding-bottom:27px; }
+    footer h3 { color:#ece9de; font-size:15px; margin:0 0 9px; }
+    footer p { font-size:10px; line-height:1.9; margin:0; }
+    footer .label { color:#595648; font-size:8px; margin:1px 0 10px; }
+    footer a { color:inherit; text-decoration:none; }
+    .copyright { border-top:1px solid #ffffff05; padding-top:18px; display:flex; justify-content:space-between; gap:16px; color:#514b3d; font:8px monospace; letter-spacing:1px; }
+
+    /* Темная тема */
+    html.dark, body.dark { 
+      --paper:#242a22; 
+      --background:#1c211b; 
+      --ink:#eeeee2; 
+      --muted:#abb09f; 
+      --line:#4d5945; 
+      --accent:#c2ae8c; 
+      --disabled-btn:#3f493b;
+      --disabled-bg:#2d332a;
+    }
+
+    @media(max-width:1120px) { .nav-inner { margin:0 24px; } main { margin:0 32px; } }
+    @media(max-width:760px) { 
+      h1 { font-size:34px; } 
+      .nav-inner { gap:24px; flex-wrap:wrap; padding:10px 0; } 
+      main { margin:0 20px; padding-top:28px; } 
+      .modules { grid-template-columns:repeat(2,1fr); } 
+      .module { min-height:135px; } 
+      .modules .module:last-child { grid-column:1/-1; } 
+      .detail { grid-template-columns:1fr; } 
+      article { padding:28px 24px; } 
+      aside { padding:25px; } 
+      .footer-grid { grid-template-columns:1fr 1fr; gap:25px; } 
+      .footer-grid>div:first-child { grid-column:1/-1; } 
+      .copyright { flex-direction:column; line-height:1.7; } 
+    }
+    @media(prefers-reduced-motion:no-preference) { .module,.theme,.confirm { transition:background .2s,color .2s; } }
+  </style>
+</head>
+<body>
+  <header id="overview">
+    <div class="wide">
+      <p class="eyebrow">МИЭМ НИУ ВШЭ — Учебный год 2025/26</p>
+      <h1>Количественные финансы и оптимизация портфеля</h1>
+      <p class="subtitle">Инженерно-исследовательский проект · МИЭМ · 2026</p>
+    </div>
+  </header>
+
+  <nav aria-label="Основная навигация">
+    <div class="wide nav-inner">
+      <button class="theme" type="button" aria-pressed="false">☾ Тёмная</button>
+      <a href="/" aria-current="page">Главная</a>
+      <a href="/dashboard">Дашборды</a>
+      <a href="#resources">Ресурсы</a>
+      <a href="/contact">Контакты</a>
+    </div>
+  </nav>
+
+  <main id="modules">
+    <p class="label section-label">Модули аналитики — Выберите метод точкой в каждом модуле</p>
+    <div class="modules" role="group" aria-label="Модули аналитики">
+      <button class="module" type="button" aria-pressed="true">
+        <span class="number">01</span>
+        <span class="category">Данные</span>
+        <strong>Выбор данных</strong>
+        <span class="module-status">Не выбран</span>
+      </button>
+      <button class="module" type="button" aria-pressed="false">
+        <span class="number">02</span>
+        <span class="category">Аналитика</span>
+        <strong>Предсказание доходности</strong>
+        <span class="module-status">Не выбран</span>
+      </button>
+      <button class="module" type="button" aria-pressed="false">
+        <span class="number">03</span>
+        <span class="category">Дисперсия</span>
+        <strong>Составление матрицы ковариации</strong>
+        <span class="module-status">Не выбран</span>
+      </button>
+      <button class="module" type="button" aria-pressed="false">
+        <span class="number">04</span>
+        <span class="category">Оптимизация</span>
+        <strong>Оптимизация портфеля</strong>
+        <span class="module-status">Не выбран</span>
+      </button>
+      <button class="module" type="button" aria-pressed="false">
+        <span class="number">05</span>
+        <span class="category">Риск</span>
+        <strong>Оценка рисков</strong>
+        <span class="module-status">Не выбран</span>
+      </button>
+    </div>
+    
+    <div class="confirm-row">
+      <button class="confirm" type="button" disabled title="Выберите методы во всех 5 модулях">Рассчитать</button>
+    </div>
+
+    <section class="detail" id="resources" aria-label="Выбранный модуль" aria-live="polite">
+      <!-- Колонка слева: список 5 методов с точками -->
+      <aside>
+        <p class="label">Выберите метод</p>
+        <ul class="method-list" id="method-list"></ul>
+      </aside>
+
+      <!-- Центральная статья: описание модуля и выбранного алгоритма -->
+      <article>
+        <div class="meta"><span id="module-number">Модуль 01</span><span id="module-category">Данные</span></div>
+        <h2 id="module-title">Выбор данных</h2>
+        <p class="description" id="module-desc"></p>
+
+        <div class="method-detail-box">
+          <p class="label" style="color:var(--accent); margin:0;">Описание выбранного алгоритма:</p>
+          <div class="method-detail-title" id="method-title">Метод не выбран</div>
+          <p class="method-detail-desc" id="method-desc">Нажмите на точку напротив любого метода слева, чтобы ознакомиться с его описанием и назначить для расчета.</p>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wide footer-grid">
+      <div>
+        <h3>Система оптимизации инвестиционного портфеля с использованием методов количественных финансов</h3>
+        <p>Платформа, созданная для экспериментов и аналитики рынка Московской биржи с помощью математических моделей. Проект МИЭМ 2026.</p>
+      </div>
+      <div id="contact">
+        <p class="label">Контакт</p>
+        <p>Волгин Борис<br><a href="mailto:bmvolgin@edu.hse.ru">bmvolgin@edu.hse.ru</a><br>МИЭМ, Высшая школа экономики</p>
+      </div>
+    </div>
+    <div class="copyright">
+      <span>© 2026 Высшая школа экономики. Все права защищены.</span>
+      <span>FinProj 101 — v1.0</span>
+      <span>Не является финансовой рекомендацией.</span>
+    </div>
+  </footer>
+
+  <script>
+    // База данных по 5 модулям и 5 методам в каждом
+    const modulesData = [
+      {
+        title: 'Выбор данных',
+        category: 'Данные',
+        description: 'Сбор и первичная подготовка биржевых данных формируют фундамент количественного моделирования. Модуль охватывает интеграцию с MOEX ISS, выгрузку цен закрытия, расчет логарифмических доходностей и проверку стационарности временных рядов для надежного последующего расчета.',
+        methods: [
+          { id: 'm1_1', name: 'Источники данных Московской биржи (MOEX)', desc: 'Загрузка официальных итогов торгов фондового рынка MOEX с расчетом непрерывно начисляемых доходностей.' },
+          { id: 'm1_2', name: 'Очистка и предобработка рядов', desc: 'Автоматическое выявление и коррекция пропущенных торговых сессий с помощью интерполяции.' },
+          { id: 'm1_3', name: 'Синхронизация временных срезов', desc: 'Выравнивание торговых календарей и временных меток между различными инструментами биржи.' },
+          { id: 'm1_4', name: 'Обработка выбросов и пропусков', desc: 'Винзоризация аномальных всплесков на квантилях 1% и 99% для исключения влияния нерыночных шумов.' },
+          { id: 'm1_5', name: 'Фильтр шума Калмана', desc: 'Разделение скрытой фундаментальной цены актива и микроструктурного шума стакана.' }
+        ]
+      },
+      {
+        title: 'Предсказание доходности',
+        category: 'Аналитика',
+        description: 'Прогнозирование ожидаемых доходностей активов с применением эконометрических методов и моделей машинного обучения. Модуль анализирует исторические тренды и рыночные факторы для формирования вектора прогнозных доходностей.',
+        methods: [
+          { id: 'm2_1', name: 'ARIMA и GARCH модели', desc: 'Линейное моделирование авторегрессии и кластеризации условной волатильности ценовых рядов.' },
+          { id: 'm2_2', name: 'Факторные модели (CAPM, Фама-Френч)', desc: 'Разложение доходности по рыночному фактору, премиям за размер (SMB) и балансовую стоимость (HML).' },
+          { id: 'm2_3', name: 'Машинное обучение (Бустинг / LightGBM)', desc: 'Нелинейное предсказание доходностей на основе набора технических индикаторов и макропеременных.' },
+          { id: 'm2_4', name: 'Нейросеть долгосрочной памяти (LSTM)', desc: 'Глубокая архитектура для выявления скрытых нелинейных паттернов и временной зависимости цен.' },
+          { id: 'm2_5', name: 'Историческое среднее геометрическое', desc: 'Консервативная оценка будущей доходности на основе долгосрочного среднего темпа роста без переобучения.' }
+        ]
+      },
+      {
+        title: 'Составление матрицы ковариации',
+        category: 'Дисперсия',
+        description: 'Оценка взаимосвязи между колебаниями активов. Рассматриваются классические и регуляризованные ковариационные матрицы, устранение спектрального шума и работа с высокоразмерными данными для снижения ошибок выборки.',
+        methods: [
+          { id: 'm3_1', name: 'Выборочная ковариация', desc: 'Стандартная эмпирическая несмещенная оценка ковариаций, базовая для портфельных моделей.' },
+          { id: 'm3_2', name: 'Методы сжатия (Ledoit-Wolf)', desc: 'Оптимальное линейное сжатие выборочной матрицы к диагональной структуре для гарантированной устойчивости.' },
+          { id: 'm3_3', name: 'Экспоненциальное сглаживание (EWMA)', desc: 'Присвоение большего веса свежим рыночным событиям с коэффициентом затухания лямбда = 0.94.' },
+          { id: 'm3_4', name: 'Денойзинг через случайные матрицы (RMT)', desc: 'Отсечение шумовой части спектра собственных значений по границе Марченко-Пастура.' },
+          { id: 'm3_5', name: 'Полуковариация падений (Semi-Covariance)', desc: 'Учет корреляционной связи только при синхронном падении стоимости активов ниже среднего.' }
+        ]
+      },
+      {
+        title: 'Оптимизация портфеля',
+        category: 'Оптимизация',
+        description: 'Построение границы эффективности и расчет оптимальных весов инвестиционных инструментов. Балансировка между максимизацией доходности и минимизацией совокупной дисперсии с учетом реальных торговых ограничений.',
+        methods: [
+          { id: 'm4_1', name: 'Модель Марковица (Максимизация Шарпа)', desc: 'Поиск портфеля с наивысшим отношением избыточной доходности к совокупному риску волатильности.' },
+          { id: 'm4_2', name: 'Портфель глобального минимума дисперсии (GMV)', desc: 'Распределение весов исключительно для минимизации риска без ненадежных прогнозов доходностей.' },
+          { id: 'm4_3', name: 'Равенство рисковых вкладов (Risk Parity)', desc: 'Распределение долей капитала так, чтобы каждый актив вносил равный вклад в общий риск.' },
+          { id: 'm4_4', name: 'Модель Блэка-Литтермана', desc: 'Байесовское объединение рыночного равновесия индексов с индивидуальными взглядами аналитика.' },
+          { id: 'm4_5', name: 'Иерархический паритет риска (HRP)', desc: 'Кластеризация ковариационного графа активов машинным обучением без обращения матрицы ковариации.' }
+        ]
+      },
+      {
+        title: 'Оценка рисков',
+        category: 'Риск',
+        description: 'Комплексный стресс-тест и оценка хвостовых рисков сформированного портфеля. Моделирование экстремальных рыночных шоков, расчет исторического и параметрического VaR/CVaR для контроля допустимых убытков.',
+        methods: [
+          { id: 'm5_1', name: 'Value at Risk (VaR)', desc: 'Непараметрический квантильный подсчет максимального ожидаемого убытка на основе фактической истории цен.' },
+          { id: 'm5_2', name: 'Conditional VaR (Expected Shortfall)', desc: 'Математическое ожидание потерь в случаях, когда убытки пробивают критическую отсечку VaR.' },
+          { id: 'm5_3', name: 'Монте-Карло симуляция с t-распределением', desc: 'Генерация 50 000 синтетических путей доходности с учетом «тяжелых хвостов» распределения рынка.' },
+          { id: 'm5_4', name: 'Анализ максимальной просадки (Drawdown)', desc: 'Оценка пиковых спадов капитала от локального максимума до дна и времени восстановления.' },
+          { id: 'm5_5', name: 'Стресс-тестирование кризисов (2008, 2014, 2022)', desc: 'Моделирование поведения портфеля при повторении экстремальных рыночных шоков прошлых лет.' }
+        ]
+      }
+    ];
+
+    // Хранилище выбора для 5 модулей: [null, null, null, null, null]
+    const selections = new Array(modulesData.length).fill(null);
+    let currentModuleIndex = 0;
+
+    const cards = [...document.querySelectorAll('.module')];
+    const moduleNumber = document.querySelector('#module-number');
+    const moduleCategory = document.querySelector('#module-category');
+    const moduleTitle = document.querySelector('#module-title');
+    const moduleDesc = document.querySelector('#module-desc');
+    const methodList = document.querySelector('#method-list');
+    const methodTitle = document.querySelector('#method-title');
+    const methodDesc = document.querySelector('#method-desc');
+    const confirmBtn = document.querySelector('.confirm');
+
+    // Проверка активности кнопки «Рассчитать»
+    function checkConfirmStatus() {
+      const allDone = selections.every(s => s !== null);
+      confirmBtn.disabled = !allDone;
+      if (allDone) {
+        confirmBtn.title = 'Все 5 методов выбраны! Нажмите для расчета и печати в терминал';
+      } else {
+        const left = selections.filter(s => s === null).length;
+        confirmBtn.title = `Выберите методы еще в ${left} модулях`;
+      }
+    }
+
+    // Выбор конкретного метода кликом по точке слева
+    function selectMethod(method, itemEl) {
+      selections[currentModuleIndex] = {
+        moduleId: currentModuleIndex + 1,
+        moduleName: modulesData[currentModuleIndex].title,
+        methodId: method.id,
+        methodName: method.name,
+        desc: method.desc
+      };
+
+      // Переключаем активную точку
+      [...methodList.children].forEach(li => li.classList.remove('active'));
+      itemEl.classList.add('active');
+
+      // Обновляем описание по центру
+      methodTitle.textContent = method.name;
+      methodDesc.textContent = method.desc;
+
+      // Обновляем статус в карточке модуля наверху
+      cards[currentModuleIndex].querySelector('.module-status').textContent = '✓ ' + method.name;
+
+      checkConfirmStatus();
+    }
+
+    // Отрисовка активного модуля
+    function displayModule(index) {
+      currentModuleIndex = index;
+      const data = modulesData[index];
+
+      // Активная карточка модуля
+      cards.forEach((c, i) => c.setAttribute('aria-pressed', String(i === index)));
+
+      moduleNumber.textContent = 'Модуль ' + String(index + 1).padStart(2, '0');
+      moduleCategory.textContent = data.category;
+      moduleTitle.textContent = data.title;
+      moduleDesc.textContent = data.description;
+
+      // Отрисовка списка 5 методов с точками слева
+      methodList.innerHTML = '';
+      data.methods.forEach((method, i) => {
+        const li = document.createElement('li');
+        li.className = 'method-item';
+
+        const isSelected = selections[index] && selections[index].methodId === method.id;
+        if (isSelected) li.classList.add('active');
+
+        li.innerHTML = `
+          <span class="method-num">${String(i + 1).padStart(2, '0')}</span>
+          <span class="method-dot" title="Нажмите, чтобы выбрать"></span>
+          <span class="method-name">${method.name}</span>
+        `;
+
+        li.addEventListener('click', () => selectMethod(method, li));
+        methodList.appendChild(li);
+      });
+
+      // Отображение описания метода по центру
+      if (selections[index]) {
+        methodTitle.textContent = selections[index].methodName;
+        methodDesc.textContent = selections[index].desc;
+      } else {
+        methodTitle.textContent = 'Метод не выбран';
+        methodDesc.textContent = 'Нажмите на точку напротив любого метода слева, чтобы ознакомиться с его описанием и назначить для расчета.';
+      }
+    }
+
+    // Клик по модулям наверху
+    cards.forEach((card, index) => {
+      card.addEventListener('click', () => displayModule(index));
+    });
+
+    // Кнопка «Рассчитать»: печать в терминал (console.log)
+    confirmBtn.addEventListener('click', () => {
+      if (confirmBtn.disabled) return;
+
+      console.clear();
+      console.log('%c======================================================', 'color: #344a32; font-weight: bold;');
+      console.log('%c ПАРАМЕТРЫ РАСЧЕТА КВАНТОВОГО ПОРТФЕЛЯ (ВЫБРАННЫЕ МЕТОДЫ) ', 'background: #344a32; color: #fffef0; font-weight: bold; padding: 4px;');
+      console.log('%c======================================================', 'color: #344a32; font-weight: bold;');
+
+      selections.forEach(sel => {
+        console.log(`%c[Модуль 0${sel.moduleId}: ${sel.moduleName}]`, 'color: #80674e; font-weight: bold;');
+        console.log(`  -> Метод: ${sel.methodName}`);
+        console.log(`  -> Описание: ${sel.desc}`);
+      });
+
+      console.log('%c------------------------------------------------------', 'color: #77776d;');
+      console.table(selections.map(s => ({
+        Модуль: s.moduleName,
+        Выбранный_метод: s.methodName,
+        Идентификатор: s.methodId
+      })));
+
+      alert('Расчет сформирован! Все выбранные методы для 5 модулей успешно напечатаны в консоль/терминал (F12 -> Console).');
+    });
+
+    // Переключатель темной темы
+    const themeBtn = document.querySelector('.theme');
+
+    if (localStorage.getItem('theme') === 'dark') {
+      document.body.classList.add('dark');
+      document.documentElement.classList.add('dark');
+      themeBtn.setAttribute('aria-pressed', 'true');
+      themeBtn.textContent = '☀ Светлая';
+    }
+
+    themeBtn.addEventListener('click', event => {
+      const dark = document.body.classList.toggle('dark');
+      document.documentElement.classList.toggle('dark', dark);
+      event.currentTarget.setAttribute('aria-pressed', String(dark));
+      event.currentTarget.textContent = dark ? '☀ Светлая' : '☾ Тёмная';
+      localStorage.setItem('theme', dark ? 'dark' : 'light');
+    });
+
+    // Инициализация первого модуля
+    displayModule(0);
+    checkConfirmStatus();
+  </script>
+</body>
+</html>
