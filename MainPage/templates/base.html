@@ -1,0 +1,29 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Количественные финансы и оптимизация портфеля{% endblock %}</title>
+    <script>
+        // До отрисовки страницы применяем сохранённую тему.
+        try {
+            if (localStorage.getItem('theme') === 'dark') {
+                document.documentElement.classList.add('dark');
+            }
+        } catch (error) { /* Хранилище может быть недоступно. */ }
+    </script>
+    <link rel="stylesheet" href="{% static 'MainPage/css/base.css' %}">
+    {% block extra_css %}{% endblock %}
+    <script src="{% static 'MainPage/js/theme.js' %}" defer></script>
+</head>
+<body>
+    {% include "includes/header.html" %}
+    {% include "includes/nav.html" %}
+    <main id="{% block main_id %}content{% endblock %}">
+        {% block content %}{% endblock %}
+    </main>
+    {% include "includes/footer.html" %}
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

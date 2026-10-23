@@ -1,0 +1,123 @@
+#team {
+    padding-bottom:60px;
+}
+
+.section-label {
+    margin:0 0 14px;
+    color:var(--muted);
+    letter-spacing:1.5px;
+}
+
+/* Developers Grid */ .team-grid {
+    display:grid;
+    grid-template-columns:repeat(4, minmax(0, 1fr));
+    gap:12px;
+}
+
+.team-card {
+    min-width:0;
+    position:relative;
+    background:var(--paper);
+    border:1px solid var(--line);
+    padding:24px 20px 22px;
+    display:flex;
+    flex-direction:column;
+    min-height:260px;
+}
+
+.team-card::after {
+    content:"";
+    width:24px;
+    height:1px;
+    background:var(--line);
+    position:absolute;
+    left:20px;
+    top:18px;
+}
+
+.card-meta {
+    flex-wrap:wrap;
+    gap:8px;
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    margin-top:8px;
+    margin-bottom:12px;
+}
+
+.team-card .number {
+    font:9px "Courier New",monospace;
+    letter-spacing:1px;
+    color:#a8aa9e;
+}
+
+.team-card .category {
+    font-size:8px;
+    letter-spacing:1px;
+    color:var(--accent);
+    text-transform:uppercase;
+}
+
+.team-card h2 {
+    font-size:20px;
+    margin:0 0 6px;
+    line-height:1.2;
+}
+
+.role-title {
+    font-family:"Courier New",monospace;
+    font-size:9px;
+    color:var(--muted);
+    text-transform:uppercase;
+    margin:0 0 14px;
+    letter-spacing:0.8px;
+}
+
+.bio {
+    font-size:11px;
+    line-height:1.75;
+    color:var(--ink);
+    margin:0 0 16px;
+    flex-grow:1;
+}
+
+.contact-links {
+    border-top:1px solid var(--line);
+    padding-top:12px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    font-size:10px;
+}
+
+.contact-links a {
+    color:var(--accent);
+    text-decoration:none;
+    word-break:break-all;
+}
+
+.contact-links a:hover {
+    text-decoration:underline;
+}
+
+.team-card h2, .team-card .category {
+    overflow-wrap:anywhere;
+}
+
+@media (max-width:860px) {
+    .team-grid {
+        grid-template-columns:repeat(2,minmax(0,1fr));
+    }
+}
+
+@media (max-width:760px) {
+    .team-grid {
+        grid-template-columns:1fr;
+    }
+}
+
+@media (prefers-reduced-motion:no-preference) {
+    .team-card {
+        transition:background .2s,color .2s;
+    }
+}

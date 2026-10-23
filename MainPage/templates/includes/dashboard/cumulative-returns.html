@@ -1,0 +1,24 @@
+<article class="chart-panel">
+        <div class="panel-meta">
+          <span class="number">FIG. 02</span>
+          <span class="category">Бэктест</span>
+        </div>
+        <h2>Кумулятивная доходность</h2>
+        <p class="chart-caption">Сравнение синтетического портфеля с базовым индексом Мосбиржи (IMOEX).</p>
+        <div class="chart-box">
+          <svg viewBox="0 0 400 200" preserveAspectRatio="none">
+            <!-- Сетка -->
+            <line x1="40" y1="20" x2="380" y2="20" stroke="var(--chart-grid)" stroke-dasharray="3"/>
+            <line x1="40" y1="70" x2="380" y2="70" stroke="var(--chart-grid)" stroke-dasharray="3"/>
+            <line x1="40" y1="120" x2="380" y2="120" stroke="var(--chart-grid)" stroke-dasharray="3"/>
+            <line x1="40" y1="170" x2="380" y2="170" stroke="var(--line)"/>
+            <line x1="40" y1="20" x2="40" y2="170" stroke="var(--line)"/>
+            <!-- Линия бенчмарка (MOEX) -->
+            <path d="M 40 160 L 90 150 L 140 155 L 190 140 L 240 145 L 290 130 L 340 135 L 380 125" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4"/>
+            <!-- Линия модели -->
+            <path d="M 40 160 L 90 140 L 140 130 L 190 105 L 240 95 L 290 65 L 340 55 L 380 35" fill="none" stroke="var(--green)" stroke-width="2"/>
+            <text x="310" y="30" font-size="9" fill="var(--green)" font-family="monospace">Портфель</text>
+            <text x="310" y="115" font-size="9" fill="var(--muted)" font-family="monospace">Индекс MOEX</text>
+          </svg>
+        </div>
+      </article>
