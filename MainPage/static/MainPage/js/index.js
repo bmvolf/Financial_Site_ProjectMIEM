@@ -97,29 +97,56 @@
     });
 
     // Кнопка «Рассчитать»: вывод в консоль браузера (console.log)
-    confirmBtn.addEventListener('click', () => {
-      if (confirmBtn.disabled) return;
+  confirmBtn.addEventListener('click', async () => {
+    if (confirmBtn.disabled) return;
 
-      console.clear();
-      console.log('%c======================================================', 'color: #344a32; font-weight: bold;');
-      console.log('%c ПАРАМЕТРЫ РАСЧЕТА ИНВЕСТИЦИОННОГО ПОРТФЕЛЯ (ВЫБРАННЫЕ МЕТОДЫ) ', 'background: #344a32; color: #fffef0; font-weight: bold; padding: 4px;');
-      console.log('%c======================================================', 'color: #344a32; font-weight: bold;');
+    const output = document.querySelector('#calculation-result');
+    const csrfToken = document.querySelector(
+        '[name=csrfmiddlewaretoken]'
+    ).value;
 
-      selections.forEach(sel => {
-        console.log(`%c[Модуль 0${sel.moduleId}: ${sel.moduleName}]`, 'color: #80674e; font-weight: bold;');
-        console.log(`  -> Метод: ${sel.methodName}`);
-        console.log(`  -> Описание: ${sel.desc}`);
-      });
+    confirmBtn.disabled = true;
+    output.textContent = 'Выполняется расчёт…';
 
-      console.log('%c------------------------------------------------------', 'color: #77776d;');
-      console.table(selections.map(s => ({
-        Модуль: s.moduleName,
-        Выбранный_метод: s.methodName,
-        Идентификатор: s.methodId
-      })));
+    try {
+        const response = await fetch(confirmBtn.dataset.url, {
+            method: 'POST',
 
-      alert('Выбранные методы выведены в консоль браузера (F12 → Console). Вычисления пока не подключены.');
-    });
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken,
+            },
+
+            // Для примера метод и данные заданы явно.
+            body: JSON.stringify({
+            methods: selections.map(selection => ({
+                module_id: selection.moduleId,
+                method_id: selection.methodId,
+            })),
+            tickers: ['SBER', 'LKOH'],
+        }),
+        });
+
+        if (!response.headers.get('content-type')?.includes('application/json')) {
+            throw new Error(`Сервер вернул неожиданный ответ: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || 'Ошибка расчёта');
+        }
+
+        const result = data.result;
+
+        output.textContent = JSON.stringify(data, null, 2);
+
+    } catch (error) {
+        output.textContent = `Ошибка: ${error.message}`;
+    } finally {
+        checkConfirmStatus();
+    }
+});
 
 
 

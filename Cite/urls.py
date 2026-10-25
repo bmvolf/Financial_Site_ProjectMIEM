@@ -21,5 +21,6 @@ from MainPage import views
 urlpatterns = [
     path('', views.index, name='home'),
     path('contact', views.contact, name='contact'),
-    path('dashboard', views.dashboard, name = 'dashboard')
+    path('dashboard', views.dashboard, name = 'dashboard'),
+     path("api/calculate/", views.calculate, name="calculate")
 ]

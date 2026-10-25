@@ -44,8 +44,19 @@
     </div>
 
     <div class="confirm-row">
-      <button class="confirm" type="button" disabled title="Выберите методы во всех 5 модулях">Рассчитать</button>
+        {% csrf_token %}
+
+        <button
+            class="confirm"
+            type="button"
+            data-url="{% url 'calculate' %}"
+            disabled
+        >
+            Рассчитать
+        </button>
     </div>
+
+<pre id="calculation-result" aria-live="polite"></pre>
 
     <section class="detail" id="resources" aria-label="Выбранный модуль" aria-live="polite">
       <!-- Колонка слева: список 5 методов с точками -->
