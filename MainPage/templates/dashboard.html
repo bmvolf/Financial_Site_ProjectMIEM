@@ -9,48 +9,50 @@
 {% endblock %}
 
 {% block content %}
-<p class="label section-label">Ключевые показатели — Расчетный портфель MOEX</p>
+<p class="label section-label">
+  Ключевые показатели — Расчетный портфель MOEX
+</p>
 
-    <!-- KPI Row -->
-    <div class="kpi-row">
-      <div class="kpi-card">
-        <span class="number">01</span>
-        <div class="kpi-title">Ожидаемая доходность</div>
-        <div class="kpi-val">+21.8%</div>
-      </div>
-      <div class="kpi-card">
-        <span class="number">02</span>
-        <div class="kpi-title">Волатильность (σ)</div>
-        <div class="kpi-val">12.4%</div>
-      </div>
-      <div class="kpi-card">
-        <span class="number">03</span>
-        <div class="kpi-title">Коэффициент Шарпа</div>
-        <div class="kpi-val">1.76</div>
-      </div>
-      <div class="kpi-card">
-        <span class="number">04</span>
-        <div class="kpi-title">Historical VaR (95%)</div>
-        <div class="kpi-val">-2.15%</div>
-      </div>
-    </div>
+<div class="kpi-row">
+  <div class="kpi-card">
+    <span class="number">01</span>
+    <div class="kpi-title">Ожидаемая доходность</div>
+    <div class="kpi-val" id="metric-return">—</div>
+  </div>
 
-    <p class="label section-label charts-label">Визуализация математических моделей</p>
+  <div class="kpi-card">
+    <span class="number">02</span>
+    <div class="kpi-title">Волатильность (σ)</div>
+    <div class="kpi-val" id="metric-volatility">—</div>
+  </div>
 
-    <!-- Charts Grid -->
-    <div class="charts-grid">
+  <div class="kpi-card">
+    <span class="number">03</span>
+    <div class="kpi-title">Коэффициент Шарпа</div>
+    <div class="kpi-val" id="metric-sharpe">—</div>
+  </div>
 
-      <!-- Graph 1: Efficient Frontier -->
-      {% include "includes/dashboard/efficient-frontier.html" %}
+  <div class="kpi-card">
+    <span class="number">04</span>
+    <div class="kpi-title">Historical VaR (95%)</div>
+    <div class="kpi-val" id="metric-var">—</div>
+  </div>
+</div>
 
-      <!-- Graph 2: Cumulative Returns -->
-      {% include "includes/dashboard/cumulative-returns.html" %}
+<p id="dashboard-message">
+  Сначала выполните расчёт портфеля.
+</p>
 
-      <!-- Graph 3: Asset Allocation -->
-      {% include "includes/dashboard/asset-allocation.html" %}
+<p class="label section-label charts-label">
+  Визуализация математических моделей
+</p>
 
-      <!-- Graph 4: Correlation Matrix Heatmap -->
-      {% include "includes/dashboard/correlation-matrix.html" %}
+<div class="charts-grid">
+  {% include "includes/dashboard/efficient-frontier.html" %}
+  {% include "includes/dashboard/cumulative-returns.html" %}
+  {% include "includes/dashboard/asset-allocation.html" %}
+  {% include "includes/dashboard/correlation-matrix.html" %}
+</div>
 
-    </div>
+<script src="{% static 'MainPage/js/dashboard.js' %}" defer></script>
 {% endblock %}

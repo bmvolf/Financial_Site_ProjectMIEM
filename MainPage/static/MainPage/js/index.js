@@ -1,6 +1,38 @@
 (() => {
 // Хранилище выбора для 5 модулей: [null, null, null, null, null]
     const selections = new Array(modulesData.length).fill(null);
+  const storageKey = 'selectedMethods';
+
+  try {
+    const saved = JSON.parse(sessionStorage.getItem(storageKey) || '[]');
+
+    if (Array.isArray(saved)) {
+      modulesData.forEach((module, index) => {
+        const savedSelection = saved[index];
+
+        if (!savedSelection) return;
+
+        // Проверяем, что сохранённый метод ещё существует.
+        const method = module.methods.find(
+          method => method.id === savedSelection.methodId
+        );
+
+        if (!method) return;
+
+        // Названия и описание берём из актуальных данных.
+        selections[index] = {
+          moduleId: index + 1,
+          moduleName: module.title,
+          methodId: method.id,
+          methodName: method.name,
+          desc: method.desc,
+        };
+      });
+    }
+  } catch (error) {
+    console.warn('Не удалось восстановить выбранные методы:', error);
+  }
+
     let currentModuleIndex = 0;
 
     const cards = [...document.querySelectorAll('.module')];
@@ -34,7 +66,7 @@
         methodName: method.name,
         desc: method.desc
       };
-
+      sessionStorage.setItem(storageKey, JSON.stringify(selections));
       // Переключаем активную точку
       [...methodList.children].forEach(li => li.classList.remove('active'));
       itemEl.classList.add('active');
@@ -136,10 +168,15 @@
         if (!response.ok) {
             throw new Error(data.error || 'Ошибка расчёта');
         }
+        sessionStorage.setItem("portfolioResult", JSON.stringify(data));
 
         const result = data.result;
 
         output.textContent = JSON.stringify(data, null, 2);
+        sessionStorage.setItem("portfolioResult", JSON.stringify(data));
+
+        // Переходим на страницу дашбордов.
+        //window.location.href = "dashboard";
 
     } catch (error) {
         output.textContent = `Ошибка: ${error.message}`;
@@ -151,7 +188,19 @@
 
 
     // Инициализация первого модуля
-    displayModule(0);
-    checkConfirmStatus();
+  // Восстанавливаем подписи выбранных методов на всех карточках.
+  cards.forEach((card, index) => {
+    const selection = selections[index];
+
+    if (selection) {
+      card.querySelector('.module-status').textContent =
+        '✓ ' + selection.methodName;
+    }
+  });
+
+  // displayModule уже умеет восстанавливать активную точку
+  // и описание из selections.
+  displayModule(0);
+  checkConfirmStatus();
 
 })();

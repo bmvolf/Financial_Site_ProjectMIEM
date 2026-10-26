@@ -1,6 +1,7 @@
 from django.shortcuts import render
 
 import json
+import numpy as np
 import math
 
 from django.http import JsonResponse
@@ -111,12 +112,23 @@ def calculate(request):
     prices = selected[1](tickers)
     expected_returns = selected[2](prices)
     covariance_matrix = selected[3](prices)
-    portfolio_weights = selected[4](expected_returns, covariance_matrix)
-    risk = selected[5](prices, portfolio_weights)
+    weights = selected[4](expected_returns, covariance_matrix)
+    risk = selected[5](prices, weights)
 
+    w = np.asarray(weights, dtype=float)
+    mu = np.asarray(expected_returns, dtype=float)
+    cov = np.asarray(covariance_matrix, dtype=float)
+
+    portfolio_return = float(w @ mu)
+    portfolio_variance = float(w @ cov @ w)
+    portfolio_volatility = float(np.sqrt(max(portfolio_variance, 0.0)))
     return JsonResponse({
-        "portfolio_weights": portfolio_weights,
-        "covariance_matrix": covariance_matrix,
-        "expected_returns": expected_returns,
-        "risk": risk,
+    "tickers": tickers,
+    "portfolio_weights": w.tolist(),
+    "expected_returns": mu.tolist(),
+    "covariance_matrix": cov.tolist(),
+    "metrics": {
+        "expected_return": portfolio_return,
+        "volatility": portfolio_volatility,
+    },
     })
