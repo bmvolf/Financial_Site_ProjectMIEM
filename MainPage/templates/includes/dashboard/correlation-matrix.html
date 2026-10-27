@@ -1,45 +1,29 @@
-<article class="chart-panel">
-        <div class="panel-meta">
-          <span class="number">FIG. 04</span>
-          <span class="category">Корреляция</span>
-        </div>
-        <h2>Матрица взаимосвязи активов</h2>
-        <p class="chart-caption">Тепловая карта парных коэффициентов корреляции лог-доходностей тикеров.</p>
-        <div class="chart-box">
-          <svg viewBox="0 0 400 200">
-            <!-- Подписи колонок -->
-            <text x="135" y="30" font-size="8" fill="var(--muted)" font-family="monospace" text-anchor="middle">SBER</text>
-            <text x="175" y="30" font-size="8" fill="var(--muted)" font-family="monospace" text-anchor="middle">LKOH</text>
-            <text x="215" y="30" font-size="8" fill="var(--muted)" font-family="monospace" text-anchor="middle">GMKN</text>
-            <text x="255" y="30" font-size="8" fill="var(--muted)" font-family="monospace" text-anchor="middle">YNDX</text>
+<article class="chart-panel covariance-panel">
+  <div class="panel-meta">
+    <span class="number">FIG. 04</span>
+    <span class="category">Ковариация</span>
+  </div>
 
-            <!-- Строка 1 -->
-            <text x="105" y="58" font-size="8" fill="var(--muted)" font-family="monospace" text-anchor="end">SBER</text>
-            <rect x="120" y="42" width="30" height="24" fill="var(--green)"/>
-            <rect x="160" y="42" width="30" height="24" fill="var(--green)" opacity="0.75"/>
-            <rect x="200" y="42" width="30" height="24" fill="var(--green)" opacity="0.45"/>
-            <rect x="240" y="42" width="30" height="24" fill="var(--green)" opacity="0.25"/>
+  <h2>Матрица ковариаций</h2>
 
-            <!-- Строка 2 -->
-            <text x="105" y="93" font-size="8" fill="var(--muted)" font-family="monospace" text-anchor="end">LKOH</text>
-            <rect x="120" y="77" width="30" height="24" fill="var(--green)" opacity="0.75"/>
-            <rect x="160" y="77" width="30" height="24" fill="var(--green)"/>
-            <rect x="200" y="77" width="30" height="24" fill="var(--green)" opacity="0.55"/>
-            <rect x="240" y="77" width="30" height="24" fill="var(--green)" opacity="0.2"/>
+  <p class="chart-caption">
+    Совместная изменчивость доходностей активов.
+    Наведите курсор на ячейку, чтобы увидеть значение.
+  </p>
 
-            <!-- Строка 3 -->
-            <text x="105" y="128" font-size="8" fill="var(--muted)" font-family="monospace" text-anchor="end">GMKN</text>
-            <rect x="120" y="112" width="30" height="24" fill="var(--green)" opacity="0.45"/>
-            <rect x="160" y="112" width="30" height="24" fill="var(--green)" opacity="0.55"/>
-            <rect x="200" y="112" width="30" height="24" fill="var(--green)"/>
-            <rect x="240" y="112" width="30" height="24" fill="var(--green)" opacity="0.35"/>
+  <p id="covariance-message">Сначала выполните расчёт портфеля.</p>
 
-            <!-- Строка 4 -->
-            <text x="105" y="163" font-size="8" fill="var(--muted)" font-family="monospace" text-anchor="end">YNDX</text>
-            <rect x="120" y="147" width="30" height="24" fill="var(--green)" opacity="0.25"/>
-            <rect x="160" y="147" width="30" height="24" fill="var(--green)" opacity="0.2"/>
-            <rect x="200" y="147" width="30" height="24" fill="var(--green)" opacity="0.35"/>
-            <rect x="240" y="147" width="30" height="24" fill="var(--green)"/>
-          </svg>
-        </div>
-      </article>
+  <div class="covariance-scroll">
+    <svg id="covariance-chart" role="img" aria-label="Тепловая карта матрицы ковариаций"></svg>
+  </div>
+
+  <div class="covariance-legend" hidden>
+    <div class="covariance-gradient"></div>
+    <div class="covariance-scale">
+      <span id="covariance-min"></span>
+      <span>0</span>
+      <span id="covariance-max"></span>
+    </div>
+    <p>Отрицательная ← ковариация → положительная</p>
+  </div>
+</article>

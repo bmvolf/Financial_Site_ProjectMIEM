@@ -176,7 +176,7 @@
         sessionStorage.setItem("portfolioResult", JSON.stringify(data));
 
         // Переходим на страницу дашбордов.
-        //window.location.href = "dashboard";
+        window.location.href = "dashboard";
 
     } catch (error) {
         output.textContent = `Ошибка: ${error.message}`;

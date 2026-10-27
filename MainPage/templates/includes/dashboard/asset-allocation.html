@@ -1,27 +1,18 @@
-<article class="chart-panel">
-        <div class="panel-meta">
-          <span class="number">FIG. 03</span>
-          <span class="category">Веса активов</span>
-        </div>
-        <h2>Структура распределения (Веса)</h2>
-        <p class="chart-caption">Текущее распределение долей ценных бумаг в сбалансированном портфеле.</p>
-        <div class="chart-box">
-          <svg viewBox="0 0 400 200">
-            <!-- Горизонтальные бары -->
-            <text x="40" y="42" font-size="9" fill="var(--ink)" font-family="monospace">SBER (30%)</text>
-            <rect x="130" y="32" width="180" height="13" fill="var(--green)"/>
+<article class="chart-panel allocation-panel">
+  <div class="panel-meta">
+    <span class="number">FIG. 03</span>
+    <span class="category">Веса активов</span>
+  </div>
 
-            <text x="40" y="77" font-size="9" fill="var(--ink)" font-family="monospace">LKOH (25%)</text>
-            <rect x="130" y="67" width="150" height="13" fill="var(--accent)"/>
+  <h2>Структура распределения портфеля</h2>
 
-            <text x="40" y="112" font-size="9" fill="var(--ink)" font-family="monospace">GMKN (20%)</text>
-            <rect x="130" y="102" width="120" height="13" fill="#6e7d63"/>
+  <p class="chart-caption">
+    Доля каждого актива в рассчитанном портфеле.
+  </p>
 
-            <text x="40" y="147" font-size="9" fill="var(--ink)" font-family="monospace">YNDX (15%)</text>
-            <rect x="130" y="137" width="90" height="13" fill="#a89a84"/>
+  <p id="allocation-message">
+    Сначала выполните расчёт портфеля.
+  </p>
 
-            <text x="40" y="182" font-size="9" fill="var(--ink)" font-family="monospace">OFZ  (10%)</text>
-            <rect x="130" y="172" width="60" height="13" fill="var(--line)"/>
-          </svg>
-        </div>
-      </article>
+  <div id="allocation-chart" class="allocation-chart" aria-label="Веса активов портфеля"></div>
+</article>
