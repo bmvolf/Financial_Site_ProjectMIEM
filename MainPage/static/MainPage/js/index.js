@@ -155,7 +155,7 @@
                 module_id: selection.moduleId,
                 method_id: selection.methodId,
             })),
-            tickers: ['SBER', 'LKOH'],
+            tickers: ['SBER', 'LKOH', 'YNDX'],
         }),
         });
 
